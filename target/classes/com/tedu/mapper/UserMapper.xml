@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tedu.dao.UserDao">
+    <!--结果映射:类的属性名和数据库表字段名对应的映射-->
+    <resultMap id="userMap" type="User">
+        <id column="uid" property="uid"></id>
+        <result column="username" property="username"></result>
+        <result column="password" property="password"></result>
+        <result column="salt" property="salt"></result>
+        <result column="is_delete" property="isDelete"></result>
+        <result column="phone" property="phone"></result>
+        <result column="email" property="email"></result>
+        <result column="gender" property="gender"></result>
+        <result column="avatar" property="avatar"></result>
+        <result column="created_user" property="createdUser"></result>
+        <result column="created_time" property="createdTime"></result>
+        <result column="modified_time" property="modifiedTime"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+    </resultMap>
+    <!--根据用户名查询一个用户-->
+    <select id="getByUsername" parameterType="String" resultType="int">
+        select count(*) from t_user where username=#{username}
+    </select>
+    <!--注册用户-->
+    <insert id="regist" parameterType="User">
+        insert into
+            t_user(
+                username,
+                password,
+                is_delete,
+                created_user,
+                modified_user,
+                created_time,
+                modified_time
+            )
+        values(
+            #{username},
+            #{password},
+            #{isDelete},
+            #{createdUser},
+            #{modifiedUser},
+            now(),
+            now()
+        )
+    </insert>
+    <!--用户登录-->
+    <select id="login" resultMap="userMap" parameterType="String">
+        select * from t_user where username=#{username}
+    </select>
+    <!--修改密码-->
+    <update id="updatePasswordByUid" parameterType="User">
+		UPDATE
+			t_user
+		SET
+			password=#{password},
+			modified_user=#{modifiedUser},
+			username=#{username}
+		WHERE
+			uid=#{uid}
+	</update>
+    <!--通过uid更改用户信息-->
+    <update id="updateInfoByUid" >
+		UPDATE
+			t_user
+		SET
+			gender=#{gender},
+			phone=#{phone},
+			email=#{email},
+			modified_user=#{modifiedUser},
+			modified_time=#{modifiedTime}
+		WHERE
+			uid=#{uid}
+	</update>
+    <update id="updateAvatar" parameterType="User" >
+        update t_user
+        set avatar=#{avatar},
+        modified_user=#{modifiedUser},
+        modified_time=#{modifiedTime}
+        where uid=#{uid}
+    </update>
+
+
+</mapper>

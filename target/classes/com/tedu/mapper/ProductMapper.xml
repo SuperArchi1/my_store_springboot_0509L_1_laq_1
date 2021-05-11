@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tedu.dao.ProductDao">
+    <!--结果映射:类的属性名和数据库表字段名对应的映射-->
+    <resultMap id="productMap" type="Product">
+        <id column="id" property="id"></id>
+        <result column="category_id" property="cid"/>
+        <result column="item_type" property="itemType"/>
+        <result column="title" property="title"/>
+        <result column="sell_point" property="sellPoint"/>
+        <result column="price" property="price"/>
+        <result column="num" property="num"/>
+        <result column="image" property="image"/>
+        <result column="status" property="status"/>
+        <result column="priority" property="priority"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="modified_time" property="modifiedTime"/>
+        <result column="created_user" property="createdUser"/>
+        <result column="modified_user" property="modifiedUser"/>
+    </resultMap>
+    <select id="getById" parameterType="int" resultMap="productMap">
+        select * from t_product where id=#{id}
+    </select>
+    <select id="getCountByCid" parameterType="int" resultType="int">
+        select count(*) from t_product where status=1 and
+        category_id=#{cid}
+    </select>
+    <select id="listAllByCid" parameterType="map" resultMap="productMap">
+        select * from t_product where status=1 and category_id=#{cid}
+        order by priority limit #{recordIndex}, #{pageSize}
+    </select>
+</mapper>

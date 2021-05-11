@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tedu.dao.CartDao">
+    <!--结果映射:类的属性名和数据库表字段名对应的映射-->
+    <resultMap id="cartMap" type="Cart">
+        <id column="cid" property="cid"></id>
+        <result column="uid" property="uid"/>
+        <result column="pid" property="pid"/>
+        <result column="price" property="price"/>
+        <result column="num" property="num"/>
+        <result column="created_user" property="createdUser" />
+        <result column="created_time" property="createdTime" />
+        <result column="modified_user" property="modifiedUser" />
+        <result column="modified_time" property="modifiedTime" />
+    </resultMap>
+    <resultMap id="cartVoMap" type="com.tedu.entity.vo.CartVo">
+        <result column="cid" property="cid"/>
+        <result column="pid" property="pid"/>
+        <result column="uid" property="uid"/>
+        <result column="image" property="image"/>
+        <result column="title" property="title"/>
+        <result column="price" property="realPrice"/>
+        <result column="num" property="num"/>
+    </resultMap>
+    <!--保存一条购物车记录-->
+    <insert id="save" parameterType="Cart">
+        insert into
+            t_cart
+        (
+            uid,
+            pid,
+            price,
+            num,
+            created_user,
+            created_time,
+            modified_user,
+            modified_time
+        )
+        values
+        (
+            #{uid},
+            #{pid},
+            #{price},
+            #{num},
+            #{createdUser},
+            now(),
+            #{modifiedUser},
+            now()
+        )
+    </insert>
+    <!--用户查询购物车中有没有相同的记录-->
+    <select id="getByUidAndPid" resultMap="cartMap" parameterType="Cart">
+        select * from t_cart where uid=#{uid} and pid=#{pid}
+    </select>
+    <!--修改购物车商品数量-->
+    <update id="updateNum" parameterType="Cart">
+        update t_cart set num=#{num}, modified_user=#{modifiedUser},
+        modified_time=now() where cid=#{cid}
+    </update>
+    <!--用户查询自己的所有购物车记录-->
+    <select id="listCart" resultMap="cartVoMap" parameterType="int">
+        select * from t_cart as `c`,
+        t_product as `p` where c.pid=p.id and c.uid=#{uid}
+        order by c.created_time desc
+    </select>
+    <select id="findByCids" resultMap="cartVoMap" parameterType="list">
+        select * from t_cart as `c`,
+        t_product as `p` where c.pid=p.id and cid in
+        <foreach collection="list" item="cid" open="(" close=")" separator="," index="i">
+            #{cid}
+        </foreach>
+        order by c.created_time desc
+    </select>
+
+    <!--获取一条购物车记录-->
+    <select id="getById" resultMap="cartMap" parameterType="int">
+        select * from t_cart where cid=#{cid}
+    </select>
+
+    <!--删除一条购物车记录-->
+    <delete id="delete" parameterType="int">
+        delete from t_cart where cid=#{id}
+    </delete>
+    <!--删除所有购物车商品-->
+    <delete id="removeByCidList" parameterType="list">
+        delete
+        from t_cart
+        where cid in
+        <foreach collection="list" item="id1" index="i" open="(" close=")" separator=",">
+            #{id1}
+        </foreach>
+    </delete>
+</mapper>

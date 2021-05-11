@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tedu.dao.AddressDao">
+    <!--结果映射:类的属性名和数据库表字段名对应的映射-->
+    <resultMap id="addressMap" type="Address">
+        <id column="aid" property="aid"></id>
+        <result column="uid" property="uid"/>
+        <result column="name" property="name"/>
+        <result column="province_name" property="provinceName"/>
+        <result column="province_code" property="provinceCode"/>
+        <result column="city_name" property="cityName" />
+        <result column="city_code" property="cityCode" />
+        <result column="area_name" property="areaName" />
+        <result column="area_code" property="areaCode" />
+        <result column="zip" property="zip" />
+        <result column="address" property="address" />
+        <result column="phone" property="phone" />
+        <result column="tel" property="tel" />
+        <result column="tag" property="tag" />
+        <result column="is_default" property="isDefault" />
+        <result column="created_user" property="createdUser" />
+        <result column="created_time" property="createdTime" />
+        <result column="modified_user" property="modifiedUser" />
+        <result column="modified_time" property="modifiedTime" />
+    </resultMap>
+    <!--保存收货地址-->
+    <insert id="saveAddress" parameterType="Address">
+        insert into t_address(uid, name, province_name,
+        province_code, city_name, city_code, area_name,
+        area_code, zip, address, phone, tel, tag, is_default,
+        created_user, modified_user, created_time, modified_time)
+        values(#{uid}, #{name}, #{provinceName}, #{provinceCode},
+        #{cityName}, #{cityCode}, #{areaName}, #{areaCode}, #{zip},
+        #{address}, #{phone}, #{tel}, #{tag}, #{isDefault},
+        #{modifiedUser}, #{modifiedTime}, now(), now())
+    </insert>
+    <!--用户查询收货地址-->
+    <select id="list" resultMap="addressMap" parameterType="int">
+        select * from t_address where uid=#{uid}
+        order by created_time desc
+    </select>
+    <!--查询一个收货地址-->
+    <select id="getById" resultMap="addressMap" parameterType="int">
+        select * from t_address where aid=#{aid}
+    </select>
+    <!--删除一条地址-->
+    <delete id="delete" parameterType="int">
+        delete from t_address where aid=#{aid}
+    </delete>
+    <!--更新一条地址为默认地址-->
+    <update id="setDefault" parameterType="int">
+    update t_address set is_default=1 where aid=#{aid}
+    </update>
+    <!--取消更新一条地址为默认地址-->
+    <update id="setNotDefault" parameterType="int">
+    update t_address set is_default=0 where aid=#{aid}
+    </update>
+    <!--修改-->
+    <update id="update" parameterType="Address">
+    update t_address set
+    province_code=#{provinceCode},province_name=#{provinceName},city_name=#{cityName},
+    city_code=#{cityCode},area_name=#{areaName},area_code=#{areaCode},
+    zip=#{zip},address=#{address},phone=#{phone},tel=#{tel},tag=#{tag} where aid=#{aid}
+    </update>
+
+</mapper>

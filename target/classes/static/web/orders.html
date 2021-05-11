@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<!--edge浏览器H5兼容设置-->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<!--360浏览器H5兼容设置-->
+		<meta name="renderer" content="webkit" />
+		<title>电信商城</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!--导入核心文件-->
+		<script src="../bootstrap3/js/holder.js"></script>
+		<link href="../bootstrap3/css/bootstrap.css" rel="stylesheet" type="text/css">
+		<script src="../bootstrap3/jquery-1.9.1.min.js"></script>
+		<script src="../bootstrap3/js/bootstrap.js"></script>
+		<script src="../js/orders.js"></script>
+		<!-- 字体图标 -->
+		<link rel="stylesheet" href="../bootstrap3/font-awesome-4.7.0/css/font-awesome.css" />
+		<link rel="stylesheet" type="text/css" href="../css/layout.css" />
+		<link rel="stylesheet" type="text/css" href="../css/top.css" />
+		<link rel="stylesheet" type="text/css" href="../css/footer.css" />
+		<link rel="stylesheet" type="text/css" href="../css/order.css" />
+	</head>
+
+	<body>
+
+		<!--导航结束-->
+		<div class="container">
+			<div class="col-md-2">
+				<!--左侧导航开始-->
+				<div class="panel-group" id="accordion">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<!--主选项：我的订单-->
+							<p class="panel-title">
+								<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">我的订单</a>
+							</p>
+						</div>
+						<div id="collapseOne" class="panel-collapse collapse in">
+							<div class="panel-body">
+								<div><a href="javaScript:changeOrders(-1)"><b>全部订单</b></a></div>
+								<div><a href="javaScript:changeOrders(0)">待付款</a></div>
+								<div><a href="javaScript:changeOrders(1)">待收货</a></div>
+								<div><a href="orders.html">待评价</a></div>
+								<div><a href="orders.html">退货退款</a></div>
+							</div>
+						</div>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<!--主选项：资料修改-->
+							<p class="panel-title">
+								<a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">资料修改</a>
+							</p>
+						</div>
+						<div id="collapseTwo" class="panel-collapse collapse">
+							<div class="panel-body">
+								<div><a href="password.html"><b>修改密码</b></a></div>
+								<div><a href="userdata.html">个人资料</a></div>
+								<div><a href="upload.html">上传头像</a></div>
+								<div><a href="address.html">收货管理</a></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--左侧导航结束-->
+			<div id="orderListBody" class="col-md-10">
+				<div v-for="order in orders" class="panel panel-default">
+					<div class="panel-heading">
+						<div class="panel-title">
+							订单号：{{order.id}}，下单时间：{{order.orderTime|formatDate}} ，收货人：{{order.recvName}} ，
+							订单状态：{{order.status==0?`未支付`:order.status==1?`已支付`:`已超时`}}
+							<span v-if="order.status==0" class="s-countdown" :orderTime="order.orderTime|formatDate" ></span>
+						</div>
+					</div>
+					<div class="panel-body">
+						<table class="orders-table" width="100%">
+							<thead>
+								<tr>
+									<th width="15%"></th>
+									<th width="30%">商品</th>
+									<th width="8%">单价</th>
+									<th width="8%">数量</th>
+									<th width="9%">小计</th>
+									<th width="10%">售后</th>
+									<th width="10%">状态</th>
+									<th width="10%">操作</th>
+								</tr>
+							</thead>
+							<tbody class="orders-body">
+								<tr v-for="orderItem in order.orderItems" >
+									<td><img :src="`..`+orderItem.image+`collect.png`" class="img-responsive" /></td>
+									<td>{{orderItem.title}}</td>
+									<td>¥<span>{{orderItem.price}}</span></td>
+									<td>{{orderItem.num}}件</td>
+									<td>¥<span>{{orderItem.num*orderItem.price}}</span></td>
+									<td><a href="#">申请售后</a></td>
+									<td>
+										<div>已发货</div>
+										<div><a href="orderInfo.html">订单详情</a></div>
+									</td>
+									<td><a href="#" class="btn btn-default btn-xs">确认收货</a></td>
+								</tr>
+							</tbody>
+						</table>
+						<div>
+							<span class="pull-right">订单总金额：¥{{order.price}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</body>
+	<script src="../js/vue.js"></script>
+	<script type="text/javascript" >
+		var orderListUrl= "../orders/list?status=-1";
+		var timerArray=[]; // 保存计时器的数组
+		var timeout=15*60*1000; // 订单限时支付的时间
+
+		getHeader();
+		getFooter();
+		function getHeader(){
+			var url="topTemplate.html";
+			$.get(url,function(result){
+				$("body").prepend(result);
+			});
+		}
+		function getFooter(){
+			var url="footerTemplate.html";
+			$.get(url,function(result){
+				$("body").append(result);
+			});
+		}
+
+		Vue.filter("formatDate",function(value) {//这里的value就是需要过滤的数据
+			var date = new Date(value);
+			var year = date.getFullYear();
+			var month = padDate(date.getMonth()+1);
+			var day = padDate(date.getDate());
+			var hours = padDate(date.getHours());
+			var minutes = padDate(date.getMinutes());
+			var seconds = padDate(date.getSeconds());
+			//将整理好的数据返回出去
+			return year+'-'+month+'-'+day+' ' +hours+':'+minutes+':'+seconds;
+		});
+
+		var vueObj=new Vue({
+			el: '#orderListBody',
+			data:{
+				orders:[]
+			}
+		});
+		// 在vue加载完页面后再调用initTimeout方法
+		vueObj.$watch('orders',function(val) {
+			vueObj.$nextTick(function () {
+				initTimeout();
+			});
+		});
+
+		$.get(orderListUrl,function(result){
+			if(result.state === 200){
+				vueObj.orders=result.data;
+			}else{
+				alert(result.msg);
+			}
+		})
+
+		var padDate = function (value) {
+			return value<10 ? '0'+value : value;
+		};
+
+		function initTimeout(){
+			var spanArr=$(".s-countdown");
+			for(var index=0;index< spanArr.length;index++){
+				var dateStr=$(spanArr[index]).attr("ordertime");
+				startTimer(new Date(dateStr),index,spanArr[index]);
+			}
+		}
+
+		function startTimer(targetTime,index,spanObj){
+			var nowtime = new Date();
+			var time = targetTime-nowtime+timeout;
+			if(time<=0){ // 如果时间有问题，则不启动计时器
+				$(spanObj).html("剩余：00:00");
+				return;
+			}
+			var timer=setInterval(function () {
+				var nowtime2 = new Date();
+				var time2 = targetTime - nowtime2+timeout;
+				if(time2<=0){ // 倒计时结束
+					$('.timespan').html("剩余：00:00");
+					stopTimer(index);
+					return;
+				}
+				// var day = padDate(parseInt(time2 / 1000 / 60 / 60 / 24));
+				// var hour = padDate(parseInt(time2 / 1000 / 60 / 60 % 24));
+				var minute = padDate(parseInt(time2 / 1000 / 60 % 60));
+				var seconds = padDate(parseInt(time2 / 1000 % 60));
+				$(spanObj).html("剩余："+minute + ":" + seconds);
+			}, 1000);
+			// 将计时器存入timer数组
+			timerArray[index]=timer;
+		}
+
+		function stopTimer(index){
+			var timer=timerArray[index];
+			if(timer!=undefined){
+				clearInterval(timer);
+			}
+		}
+	</script>
+
+</html>

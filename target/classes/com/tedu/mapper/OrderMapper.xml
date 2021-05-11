@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tedu.dao.OrderDao">
+    <!--结果映射:类的属性名和数据库表字段名对应的映射-->
+    <resultMap id="OrderMap" type="com.tedu.entity.Order">
+        <id column="id" property="id"></id>
+        <result column="uid" property="uid"></result>
+        <result column="recv_name" property="recvName"></result>
+        <result column="recv_phone" property="recvPhone"></result>
+        <result column="recv_province" property="recvProvince"></result>
+        <result column="recv_city" property="recvCity"></result>
+        <result column="recv_area" property="recvArea"></result>
+        <result column="recv_address" property="recvAddress"></result>
+        <result column="price" property="price"></result>
+        <result column="order_time" property="orderTime"></result>
+        <result column="pay_time" property="payTime"></result>
+        <result column="status" property="status"></result>
+        <result column="created_user" property="createdUser"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+        <result column="created_time" property="createdTime"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+
+        <collection property="orderItems" columnPrefix="toi_" resultMap="OrderItemMap"></collection>
+    </resultMap>
+
+    <resultMap id="OrderItemMap" autoMapping="true" type="com.tedu.entity.OrderItem">
+        <id column="id" property="id"></id>
+        <result column="oid" property="oid"></result>
+        <result column="pid" property="pid"></result>
+        <result column="num" property="num"></result>
+        <result column="price" property="price"></result>
+        <result column="image" property="image"></result>
+        <result column="title" property="title"></result>
+        <result column="created_user" property="createdUser"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+        <result column="created_time" property="createdTime"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+    </resultMap>
+    <!--保存一条订单信息-->
+    <!--保存数据同时返回数据的ID值-->
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into t_order(
+            uid, recv_name, recv_phone, recv_province,
+            recv_city, recv_area, recv_address, status,
+            price, order_time,
+            created_user, modified_user,
+            created_time, modified_time
+        )values(
+            #{uid}, #{recvName}, #{recvPhone}, #{recvProvince},
+            #{recvCity}, #{recvArea}, #{recvAddress}, #{status},
+            #{price}, now(), #{createdUser}, #{modifiedUser},
+            now(), now()
+        )
+    </insert>
+    <!--保存一条订单详情信息-->
+    <insert id="insertOrderItem">
+        insert into t_order_item(
+            oid, pid, num, price, image, title,
+            created_user, modified_user,
+            created_time, modified_time
+        ) values(
+            #{oid}, #{pid}, #{num}, #{price}, #{image}, #{title},
+            #{createdUser}, #{modifiedUser},
+            now(), now()
+        )
+    </insert>
+
+    <select id="listByUid" resultMap="OrderMap">
+        SELECT
+            tor.*,
+            toi.id as toi_id,
+            toi.oid as toi_oid,
+            toi.pid as toi_pid,
+            toi.num as toi_num,
+            toi.price as toi_price,
+            toi.image as toi_image,
+            toi.title as toi_title,
+            toi.created_time as toi_created_tim,
+            toi.created_user as toi_created_user,
+            toi.modified_time as toi_modified_time,
+            toi.modified_user as toi_modified_user
+        FROM
+            t_order tor,
+            t_order_item toi
+        WHERE
+            tor.id = toi.oid
+        AND uid = #{uid}
+        <if test="status != -1">
+            AND tor.status = #{status}
+        </if>
+    </select>
+</mapper>
